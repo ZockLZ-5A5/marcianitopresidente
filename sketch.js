@@ -120,7 +120,7 @@ let ejecutivoQuestions = [];
 let pongQuestionActive = false;
 let pongCurrentQuestion = null;
 let pongTimer = 0;
-let pongTimerMax = 10; // 10 segundos por pregunta
+let pongTimerMax = 15; // 15 segundos por pregunta
 let pongTennisBallTimer = 0; // Temporizador para aparecer pelota de tenis (15 seg)
 let pongLives = 5; // vidas totales para todo el minijuego (no se resetean entre rondas)
 let pongInterRoundDialog = false;
@@ -135,6 +135,10 @@ let finalDialogIndex = 0;
 let finalDialogMessages = [];
 let showCredits = false;
 let otroAlienRevealed = false; // track if otroAlien name has been revealed
+// Sound effects
+let helicopteroSound, limoSound, stopSound, susSound, tadaSound, vineboomSound, winSound;
+let limoSoundPlayed = false;
+let helicopteroSoundPlayed = false;
 
 // Preload assets
 function preload() {
@@ -143,6 +147,22 @@ function preload() {
 	lunaInicio = loadImage("assets/luna zyro 1.png");
 	crasheo = loadSound("assets/car-crash-sound-effect-376874.wav");
 	crasheo.volume = 0.4;
+	
+	// Load sound effects
+	helicopteroSound = loadSound("assets/helicoptero.mp3");
+	helicopteroSound.setVolume(0.8);
+	limoSound = loadSound("assets/limo.mp3");
+	limoSound.setVolume(0.8);
+	stopSound = loadSound("assets/stop.mp3");
+	stopSound.setVolume(0.8);
+	susSound = loadSound("assets/sus.mp3");
+	susSound.setVolume(0.8);
+	tadaSound = loadSound("assets/tada.mp3");
+	tadaSound.setVolume(0.8);
+	vineboomSound = loadSound("assets/vineboom.mp3");
+	vineboomSound.setVolume(0.8);
+	winSound = loadSound("assets/win.mp3");
+	winSound.setVolume(0.8);
 	
 	fondoJardin = loadImage("assets/fondoJardinsolito.png");
 	zyroIdle = loadImage("assets/alien_green/zyroIdle1.png");
@@ -659,7 +679,7 @@ function setup(){ // corre 1 vez, CARGAR SPRITES AQUÍ!!!
 	despachoOvalImg = loadImage("assets/palaciooficina.png");
 	palacioBorrosoImg = loadImage("assets/palacioborroso.png");
 	bandaPresidencialImg = loadImage("assets/banda.png");
-	alienMaloImg = loadImage("assets/alienmalo.png");
+	alienMaloImg = loadImage("assets/derechaalienmalo.png");
 	guardFemImg = loadImage("assets/guardfem.png");
 	guardHomImg = loadImage("assets/guardhom.png");
 	
@@ -905,6 +925,8 @@ function update(){ // corre en loop, AQUÍ VA LA LÓGICA DEL JUEGO
 					// dialogue finished, create level boxes
 					dialogueActive = false;
 					otroAlienRevealed = true; // First dialog complete, name revealed
+					// Play win sound
+					if (winSound) winSound.play();
 					// Clear temporary marker before creating real boxes
 					levelBoxes = [];
 					createLevelBoxes();
@@ -1195,6 +1217,8 @@ function nivelUnoLoop(){
 			if (zyro.pos.x > width/2 - 20 && nivelUnoDialog.length > 1) {
 				nivelUnoDialogActive = true;
 				nivelUnoDialogIndex = 0;
+				// Play stop sound
+				if (stopSound) stopSound.play();
 			}
 		}
 
@@ -1259,7 +1283,7 @@ function drawLevelDialog(entry) {
 	uiText(16);
 	textAlign(LEFT, TOP);
 	fill(c);
-	let whoLabel = speaker === 'zyro' ? 'Zyro' : (speaker === 'otro' ? (otroAlienRevealed ? 'Blinky' : '???') : (speaker === 'guia' ? 'Guía' : (speaker === 'senator' ? 'Senador' : (speaker === 'juez' ? 'Juez' : (speaker === 'agente' ? 'Agente' : (speaker === 'voice' ? '???' : (speaker === 'alipresi' ? 'Alipresi' : speaker)))))));
+	let whoLabel = speaker === 'zyro' ? 'Zyro' : (speaker === 'otro' ? (otroAlienRevealed ? 'Blinky' : '???') : (speaker === 'guia' ? 'Guía' : (speaker === 'senator' ? 'Senador' : (speaker === 'juez' ? 'Juez' : (speaker === 'agente' ? 'Agente' : (speaker === 'voice' ? '???' : (speaker === 'alipresi' ? 'Presidente Mack' : speaker)))))));
 	text(whoLabel + ':', width/2 - width*0.9/2 + 20, 60);
 
 	fill(255);
@@ -1517,6 +1541,10 @@ function drawGameOverScreen() {
 		image(zyroMuertoImg, width/2, height/2 - 60, 150, 150);
 		imageMode(CORNER);
 	}
+	// Play vineboom sound once
+	if (vineboomSound && !vineboomSound.isPlaying()) {
+		vineboomSound.play();
+	}
 	fill('#F44336');
 	textAlign(CENTER);
 	uiText(48);
@@ -1546,6 +1574,12 @@ function drawVictoryUno() {
 	}
 	noStroke();
 	
+	// Play limo sound once
+	if (limoSound && !limoSoundPlayed) {
+		limoSound.play();
+		limoSoundPlayed = true;
+	}
+	
 	fill('white');
 	textAlign(CENTER);
 	uiText(48);
@@ -1559,14 +1593,18 @@ function drawVictoryUno() {
 		imageMode(CORNER);
 	}
 	
+	uiText(24);
+	fill('#8B0000'); // Rojo sangre/rojo oscuro
+	text('🚗 Los senadores te envían en limosina de regreso 🚗', width/2, height/2 + 120);
+	fill('white');
 	uiText(20);
-	text('Te envían en limusina de regreso', width/2, height/2 + 120);
 	text('Presiona ENTER para regresar', width/2, height - 60);
 	
 	if (enterBuffer > 0) {
 		enterBuffer = 0;
 		if (!completedLevels.includes(0)) completedLevels.push(0);
 		levelOneCompleted = true;
+		limoSoundPlayed = false; // Reset flag
 		
 		if (aplausosSound && aplausosSound.isPlaying()) {
 			aplausosSound.stop();
@@ -1601,11 +1639,16 @@ function startNivelDos() {
 	nivelDosGuide.image = guiaFemmImg;
 	nivelDosGuide.scale = 0.22;
 	
-	// Diálogo inicial simple
+	// Diálogo inicial ampliado
 	nivelDosDialog = [
 		{ who: 'zyro', text: '¿Este es el edificio de la Suprema Corte?' },
-		{ who: 'guia', text: 'Así es. ¿Quieres un tour?' },
-		{ who: 'zyro', text: '¡Sí, por favor!' }
+		{ who: 'guia', text: 'Así es, Zyro. Este es uno de los edificios más importantes de Mexicus.' },
+		{ who: 'zyro', text: '¿Qué se hace aquí?' },
+		{ who: 'guia', text: 'Aquí se imparte justicia y se interpreta la Constitución.' },
+		{ who: 'guia', text: 'Es donde trabaja el Poder Judicial de la Nación.' },
+		{ who: 'zyro', text: '¡Suena importante! ¿Me puedes dar un tour?' },
+		{ who: 'guia', text: 'Por supuesto. Será un placer mostrarte el edificio.' },
+		{ who: 'guia', text: 'Hay mucho que aprender sobre cómo funciona la justicia aquí.' }
 	];
 }
 
@@ -1754,6 +1797,8 @@ function nivelDosLoop() {
 				if (enterBuffer > 0) {
 					enterBuffer = 0;
 					mazoGolpeado = true;
+					// Play stop sound
+					if (stopSound) stopSound.play();
 					// Crear jueces
 					crearJueces();
 				}
@@ -1899,10 +1944,27 @@ function startBreakoutGame() {
 	}
 	
 	// Seleccionar 20 bloques aleatorios (que no sean indestructibles) para preguntas
+	// Asegurar que no estén completamente rodeados de bloques indestructibles
 	let availableIndices = [];
 	for (let i = 0; i < breakoutBlocks.length; i++) {
 		if (!breakoutBlocks[i].isUnbreakable) {
-			availableIndices.push(i);
+			// Verificar que tenga al menos un vecino destructible
+			let row = Math.floor(i / 10);
+			let col = i % 10;
+			let hasAccessibleNeighbor = false;
+			
+			// Verificar vecinos (arriba, abajo, izquierda, derecha)
+			if (row > 0 && !breakoutBlocks[i - 10].isUnbreakable) hasAccessibleNeighbor = true;
+			if (row < 9 && !breakoutBlocks[i + 10].isUnbreakable) hasAccessibleNeighbor = true;
+			if (col > 0 && !breakoutBlocks[i - 1].isUnbreakable) hasAccessibleNeighbor = true;
+			if (col < 9 && !breakoutBlocks[i + 1].isUnbreakable) hasAccessibleNeighbor = true;
+			
+			// Si es de borde, siempre es accesible
+			if (row === 0 || col === 0 || col === 9) hasAccessibleNeighbor = true;
+			
+			if (hasAccessibleNeighbor) {
+				availableIndices.push(i);
+			}
 		}
 	}
 	
@@ -2108,6 +2170,10 @@ function drawGameOverDos() {
 		image(zyroMuertoImg, width/2, height/2 - 60, 150, 150);
 		imageMode(CORNER);
 	}
+	// Play vineboom sound once
+	if (vineboomSound && !vineboomSound.isPlaying()) {
+		vineboomSound.play();
+	}
 	fill('#DAA520');
 	textAlign(CENTER);
 	uiText(48);
@@ -2251,9 +2317,15 @@ function crearJueces() {
 		{ who: 'juez', text: '¡Nosotros AMAMOS la pizza hawaiana!' },
 		{ who: 'juez', text: 'Si quieres cambiar esa ley, tendrás que demostrarnos tu conocimiento.' },
 		{ who: 'zyro', text: 'Pero yo no quiero cambiar ninguna ley de pizza...' },
-		{ who: 'juez', text: '¡Silencio! Te desafiamos a un juego.' },
-		{ who: 'juez', text: 'Toma este libro de leyes. Lo usarás como plataforma.' },
-		{ who: 'juez', text: 'Deberás romper los bloques y responder preguntas.' },
+		{ who: 'juez', text: '¡Silencio! Te desafiamos a un juego de conocimientos legales.' },
+		{ who: 'juez', text: 'Escucha bien las reglas...' },
+		{ who: 'juez', text: 'Te daremos este libro de leyes. Lo usarás como plataforma para controlar una pelota.' },
+		{ who: 'juez', text: 'Usa las FLECHAS IZQUIERDA y DERECHA para mover el libro.' },
+		{ who: 'juez', text: 'Debes romper los bloques de colores golpeándolos con la pelota.' },
+		{ who: 'juez', text: 'Los bloques VERDES con signo de interrogación (?) son bloques de pregunta.' },
+		{ who: 'juez', text: 'Al romper un bloque verde, aparecerá una pregunta que debes responder.' },
+		{ who: 'juez', text: 'Responde 10 preguntas correctamente para ganar.' },
+		{ who: 'juez', text: 'Los bloques grises son indestructibles, no se pueden romper.' },
 		{ who: 'juez', text: '¡Que comience el juicio!' }
 	];
 	nivelDosDialogActive = true;
@@ -2274,6 +2346,12 @@ function drawVictoryDos() {
 		}
 	}
 	noStroke();
+	
+	// Play helicoptero sound once
+	if (helicopteroSound && !helicopteroSoundPlayed) {
+		helicopteroSound.play();
+		helicopteroSoundPlayed = true;
+	}
 	
 	fill('white');
 	textAlign(CENTER);
@@ -2306,6 +2384,7 @@ function drawVictoryDos() {
 		enterBuffer = 0;
 		if (!completedLevels.includes(1)) completedLevels.push(1);
 		levelTwoCompleted = true;
+		helicepteroSoundPlayed = false; // Reset flag
 		returnToGarden();
 	}
 }
@@ -2408,31 +2487,20 @@ function startInteriorPalacio() {
 	nivelTresDialogActive = true; // Iniciar diálogo automáticamente
 	
 	// Reposicionar sprites al borde inferior de la pantalla
-	// otroAlien viendo hacia la izquierda
-	otroAlien.pos = { x: width/2 - 90, y: height - 70 }; // otroAlien adelante
+	// otroAlien donde estaba Zyro
+	otroAlien.pos = { x: width/2 - 90, y: height - 80 };
 	otroAlien.image = "assets/otroAlien.png";
 	otroAlien.scale = 0.7;
 	otroAlien.mirror.x = true; // Voltear horizontalmente para que mire a la izquierda
 	otroAlien.visible = true;
 	
-	// Zyro más a la derecha de otroAlien
-	zyro.pos = { x: width/2 - 10, y: height - 70 }; // Zyro a la derecha de otroAlien
+	// Zyro 100px a la derecha de otroAlien
+	zyro.pos = { x: width/2 + 10, y: height - 80 };
 	zyro.image = zyroIdleLeft; // Viendo hacia la izquierda
 	zyro.scale = 0.7;
 	zyro.visible = true;
 	
-	// Crear guardia masculino más a la derecha (misma distancia que entre otroAlien y Zyro)
-	if (agenteSecreto) agenteSecreto.remove();
-	agenteSecreto = new Sprite(width/2 + 70, height - 70, 's');
-	agenteSecreto.w = 100;
-	agenteSecreto.h = 150;
-	if (guardHomImg) {
-		agenteSecreto.image = guardHomImg;
-		agenteSecreto.scale = 0.5;
-	} else {
-		agenteSecreto.color = color(0, 0, 0);
-	}
-	agenteSecreto.rotationLock = true;
+	// NO crear guardia aquí - aparecerá después de los diálogos
 	
 	// Crear guías más juntos a la izquierda
 	if (nivelUnoGuide) nivelUnoGuide.remove();
@@ -2503,8 +2571,20 @@ function runInteriorPalacio() {
 				nivelTresDialogActive = false;
 				nivelTresDialogIndex = 0;
 				nivelTresTourAccepted = true;
-				// Crear agente del servicio secreto
-				crearAgenteSecreto();
+				// Play stop sound when agent appears
+				if (stopSound) stopSound.play();
+				// Crear agente del servicio secreto - misma distancia del borde derecho que el guía del izquierdo
+				if (agenteSecreto) agenteSecreto.remove();
+				agenteSecreto = new Sprite(width - 200, height - 90, 's'); // 200px del borde derecho, más arriba
+				agenteSecreto.w = 100;
+				agenteSecreto.h = 150;
+				if (guardHomImg) {
+					agenteSecreto.image = guardHomImg;
+					agenteSecreto.scale = 2.0; // 2x del tamaño original (1.0 * 2)
+				} else {
+					agenteSecreto.color = color(0, 0, 0);
+				}
+				agenteSecreto.rotationLock = true;
 			}
 		}
 	}
@@ -2568,14 +2648,14 @@ function startOficinaPresidencial() {
 		otroAlien.pos = { x: -5000, y: -5000 }; // Esconderlo
 	}
 	
-	// Posicionar a Zyro en el centro al borde inferior
-	zyro.pos = { x: width/2, y: height - 70 };
+	// Posicionar a Zyro más a la izquierda
+	zyro.pos = { x: width/2 - 150, y: height - 70 };
 	zyro.image = zyroIdle;
 	zyro.scale = 0.7;
 	
-	// Guardia masculino a la izquierda bloqueando la salida
+	// Guardia masculino a la izquierda de Zyro
 	if (agenteSecreto) {
-		agenteSecreto.pos = { x: width/2 - 150, y: height - 70 };
+		agenteSecreto.pos = { x: width/2 - 50, y: height - 70 };
 		if (guardHomImg) {
 			agenteSecreto.image = guardHomImg;
 			agenteSecreto.scale = 0.6;
@@ -2614,17 +2694,8 @@ function runOficinaPresidencial() {
 	if (nivelTresDialogActive) {
 		let currentDialog = nivelTresDialog[nivelTresDialogIndex];
 		
-		// Si es el diálogo de voz, mostrar de forma especial
-		if (currentDialog.who === 'voice') {
-			push();
-			uiText(20);
-			fill(255, 255, 255, 200);
-			textAlign(CENTER);
-			text(currentDialog.text, width/2, 100);
-			pop();
-		} else {
-			drawLevelDialog(currentDialog);
-		}
+		// Usar drawLevelDialog para todos los diálogos incluyendo voice
+		drawLevelDialog(currentDialog);
 		
 		push(); 
 		uiText(14); 
@@ -2641,6 +2712,8 @@ function runOficinaPresidencial() {
 			// Después del tercer diálogo (índice 2), crear alipresi
 			if (nivelTresDialogIndex === 3 && !alipresi) {
 				crearAlipresi();
+				// Play sus sound when president appears
+				if (susSound) susSound.play();
 				// Añadir resto del diálogo
 				nivelTresDialog.push(
 					{ who: 'alipresi', text: 'Soy yo... el verdadero presidente de este planeta.' },
@@ -2652,9 +2725,20 @@ function runOficinaPresidencial() {
 					{ who: 'zyro', text: 'Aprendí sobre el Poder Ejecutivo. Sé que el presidente debe servir al pueblo.' },
 					{ who: 'zyro', text: '¡Debe ejecutar las leyes, no engañar a la gente!' },
 					{ who: 'alipresi', text: 'Qué conmovedor. Veamos si sabes tanto como dices.' },
-					{ who: 'alipresi', text: 'Te reto a un duelo de pong. Si ganas, te dejaré ir.' },
-					{ who: 'alipresi', text: 'Pero si pierdes... te quedarás aquí para siempre.' },
-					{ who: 'zyro', text: '¡Acepto tu desafío!' }
+					{ who: 'alipresi', text: 'Te reto a un duelo de pong. Escucha bien las reglas...' },
+					{ who: 'alipresi', text: 'Cada uno controlaremos una barra. Yo estaré a la derecha, tú a la izquierda.' },
+					{ who: 'alipresi', text: 'Usa las FLECHAS ARRIBA y ABAJO para mover tu barra.' },
+					{ who: 'alipresi', text: 'La pelota rebotará entre nosotros. No dejes que pase tu barra.' },
+					{ who: 'alipresi', text: 'Cada 15 segundos aparecerá una pelota amarilla con un signo de interrogación.' },
+					{ who: 'alipresi', text: 'Si la pelota de pong toca la pelota amarilla, te haré una pregunta.' },
+					{ who: 'alipresi', text: 'Si respondes bien, ganarás un punto y la pelota irá hacia mí.' },
+					{ who: 'alipresi', text: 'Si fallas, YO ganaré un punto, perderás una vida y la pelota irá hacia ti.' },
+					{ who: 'alipresi', text: 'Primero te enfrentarás a mis guardias de seguridad.' },
+					{ who: 'alipresi', text: 'Y si logras vencerlos... enfrentarás al jefe final: ¡YO!' },
+					{ who: 'alipresi', text: 'Son 3 rondas en total. Cada ronda tiene 5 preguntas.' },
+					{ who: 'alipresi', text: 'Si ganas, te dejaré ir. Pero si pierdes todas tus vidas...' },
+					{ who: 'alipresi', text: 'Te quedarás aquí para siempre trabajando como mi asistente.' },
+					{ who: 'zyro', text: '¡Acepto tu desafío! ¡Defenderé la verdad!' }
 				);
 			}
 			
@@ -2668,14 +2752,14 @@ function runOficinaPresidencial() {
 }
 
 function crearAlipresi() {
-	// Crear sprite del presidente alienígena al borde inferior
+	// Crear sprite del presidente alienígena más arriba y en el centro
 	if (alipresi) alipresi.remove();
-	alipresi = new Sprite(width/2 + 150, height - 70, 's');
+	alipresi = new Sprite(width - 200, height - 120, 's'); // Más arriba y centrado entre guardias
 	alipresi.w = 100;
 	alipresi.h = 150;
 	if (alienMaloImg) {
 		alipresi.image = alienMaloImg;
-		alipresi.scale = 0.6;
+		alipresi.scale = 1.2; // 2x del tamaño original (0.6 * 2)
 	} else {
 		alipresi.color = color(255, 0, 0); // Fallback rojo
 	}
@@ -2683,16 +2767,29 @@ function crearAlipresi() {
 	
 	// Crear guardia femenina a la derecha del presidente
 	if (agenteFem) agenteFem.remove();
-	agenteFem = new Sprite(width/2 + 280, height - 70, 's');
+	agenteFem = new Sprite(width - 80, height - 120, 's'); // Más a la derecha y arriba
 	agenteFem.w = 100;
 	agenteFem.h = 150;
 	if (guardFemImg) {
 		agenteFem.image = guardFemImg;
-		agenteFem.scale = 0.6;
+		agenteFem.scale = 1.2; // 2x del tamaño original (0.6 * 2)
 	} else {
 		agenteFem.color = color(0, 0, 0);
 	}
 	agenteFem.rotationLock = true;
+	
+	// Crear guardia masculina pegado a la derecha
+	if (guardHomSprite) guardHomSprite.remove();
+	guardHomSprite = new Sprite(width - 40, height - 140, 's'); // Más pegado a la derecha y más arriba
+	guardHomSprite.w = 100;
+	guardHomSprite.h = 150;
+	if (guardHomImg) {
+		guardHomSprite.image = guardHomImg;
+		guardHomSprite.scale = 2.0; // 2x del tamaño original (1.0 * 2)
+	} else {
+		guardHomSprite.color = color(0, 0, 0);
+	}
+	guardHomSprite.rotationLock = true;
 }
 
 function runPongInterRoundDialog() {
@@ -2771,12 +2868,13 @@ function startPongGame() {
 	// Crear sprites de guardias en el fondo (fase 3)
 	// Estos se mostrarán u ocultarán según la ronda
 	if (guardFemSprite) guardFemSprite.remove();
-	guardFemSprite = new Sprite(150, height - 100, 's');
+	guardFemSprite = new Sprite(150, height - 120, 's'); // Más arriba
 	guardFemSprite.w = 100;
 	guardFemSprite.h = 150;
+	guardFemSprite.collider = 'none'; // No colisiona con nada
 	if (guardFemImg) {
 		guardFemSprite.image = guardFemImg;
-		guardFemSprite.scale = 0.5;
+		guardFemSprite.scale = 1.0; // 2x del tamaño original (0.5 * 2)
 	} else {
 		guardFemSprite.color = color(0, 0, 0);
 	}
@@ -2784,12 +2882,13 @@ function startPongGame() {
 	guardFemSprite.visible = (pongRound >= 2); // Visible en rondas 2 y 3
 	
 	if (guardHomSprite) guardHomSprite.remove();
-	guardHomSprite = new Sprite(width - 150, height - 100, 's');
+	guardHomSprite = new Sprite(width - 150, height - 120, 's'); // Más arriba
 	guardHomSprite.w = 100;
 	guardHomSprite.h = 150;
+	guardHomSprite.collider = 'none'; // No colisiona con nada
 	if (guardHomImg) {
 		guardHomSprite.image = guardHomImg;
-		guardHomSprite.scale = 0.5;
+		guardHomSprite.scale = 2.0; // 2x del tamaño original (1.0 * 2)
 	} else {
 		guardHomSprite.color = color(0, 0, 0);
 	}
@@ -2801,13 +2900,14 @@ function startPongGame() {
 	pongBall = new Sprite(width/2, height/2, 15, 'd');
 	pongBall.diameter = 15;
 	pongBall.color = color(255, 0, 0); // Roja
-	pongBall.bounciness = 0; // Sin rebote automático, usaremos colisiones manuales
+	pongBall.bounciness = 1; // Rebote elástico para mantener velocidad
 	pongBall.friction = 0;
+	pongBall.rotationLock = false; // Permitir rotación para efecto visual
+	pongBall.mass = 1;
+	// Velocidad constante
 	let angle = random([-1, 1]) * random(0.3, 0.8);
 	let dirX = random([-1, 1]);
 	pongBall.vel = { x: dirX * pongBallSpeed * cos(angle), y: pongBallSpeed * sin(angle) };
-	pongBall.rotationLock = true;
-	pongBall.mass = 1;
 	// Desactivar gravedad para la pelota
 	world.gravity.y = 0;
 	
@@ -2986,6 +3086,13 @@ function runPongGame() {
 		
 		// Física de la pelota
 		if (pongBall) {
+			// Mantener velocidad constante
+			let currentSpeed = sqrt(pongBall.vel.x * pongBall.vel.x + pongBall.vel.y * pongBall.vel.y);
+			if (currentSpeed > 0 && abs(currentSpeed - pongBallSpeed) > 0.5) {
+				pongBall.vel.x = (pongBall.vel.x / currentSpeed) * pongBallSpeed;
+				pongBall.vel.y = (pongBall.vel.y / currentSpeed) * pongBallSpeed;
+			}
+			
 			// Rebote en techo y piso
 			if (pongBall.y < 10 || pongBall.y > height - 10) {
 				pongBall.vel.y *= -1;
@@ -2993,21 +3100,37 @@ function runPongGame() {
 				if (pongBall.y > height - 10) pongBall.y = height - 10;
 			}
 			
-			// Rebote en paddles
-			if (pongBall.collides(pongPaddleZyro)) {
-				let offset = (pongBall.y - pongPaddleZyro.y) / 50;
-				pongBall.vel.x = abs(pongBall.vel.x);
-				pongBall.vel.y = offset * 5;
-				pongBall.x = pongPaddleZyro.x + pongPaddleZyro.width/2 + pongBall.width/2 + 2;
+		// Rebote en paddles (física como nivel 2, en eje vertical)
+		if (pongBall.collides(pongPaddleZyro)) {
+			// Calcular posición de impacto normalizada en eje Y (-1 a 1)
+			let hitPos = (pongBall.y - pongPaddleZyro.y) / (pongPaddleZyro.height/2);
+			// Aplicar efecto: componente Y basada en hit position (como nivel 2)
+			pongBall.vel.x = pongBallSpeed * 0.8; // Componente X constante hacia la derecha
+			pongBall.vel.y = hitPos * pongBallSpeed * 0.8; // Componente Y basada en dónde golpea verticalmente
+			// Normalizar para mantener velocidad constante total
+			let currentSpeed = sqrt(pongBall.vel.x * pongBall.vel.x + pongBall.vel.y * pongBall.vel.y);
+			if (currentSpeed > 0) {
+				pongBall.vel.x = (pongBall.vel.x / currentSpeed) * pongBallSpeed;
+				pongBall.vel.y = (pongBall.vel.y / currentSpeed) * pongBallSpeed;
 			}
-			if (pongBall.collides(pongPaddleEnemy)) {
-				let offset = (pongBall.y - pongPaddleEnemy.y) / 50;
-				pongBall.vel.x = -abs(pongBall.vel.x);
-				pongBall.vel.y = offset * 5;
-				pongBall.x = pongPaddleEnemy.x - pongPaddleEnemy.width/2 - pongBall.width/2 - 2;
+			// Asegurar que no quede atrapada
+			pongBall.x = pongPaddleZyro.x + pongPaddleZyro.width/2 + pongBall.width/2 + 2;
+		}
+		if (pongBall.collides(pongPaddleEnemy)) {
+			// Calcular posición de impacto normalizada en eje Y (-1 a 1)
+			let hitPos = (pongBall.y - pongPaddleEnemy.y) / (pongPaddleEnemy.height/2);
+			// Aplicar efecto: componente Y basada en hit position (como nivel 2)
+			pongBall.vel.x = -pongBallSpeed * 0.8; // Componente X constante hacia la izquierda
+			pongBall.vel.y = hitPos * pongBallSpeed * 0.8; // Componente Y basada en dónde golpea verticalmente
+			// Normalizar para mantener velocidad constante total
+			let currentSpeed = sqrt(pongBall.vel.x * pongBall.vel.x + pongBall.vel.y * pongBall.vel.y);
+			if (currentSpeed > 0) {
+				pongBall.vel.x = (pongBall.vel.x / currentSpeed) * pongBallSpeed;
+				pongBall.vel.y = (pongBall.vel.y / currentSpeed) * pongBallSpeed;
 			}
-			
-			// Colisión con pelota de tenis
+			// Asegurar que no quede atrapada
+			pongBall.x = pongPaddleEnemy.x - pongPaddleEnemy.width/2 - pongBall.width/2 - 2;
+		}			// Colisión con pelota de tenis
 			if (pongTennisBall && pongBall.collides(pongTennisBall)) {
 				// Activar pregunta
 				pongQuestionActive = true;
@@ -3023,13 +3146,13 @@ function runPongGame() {
 				}
 			}
 			
-			// Detectar goles
-			if (pongBall.x < 0) {
+			// Detectar goles con margen de seguridad
+			if (pongBall.x < -10) {
 				// Gol del enemigo - punto para enemigo
 				pongScoreEnemy++;
 				pongLives--; // Siempre pierde vida cuando le anotan
 				resetPongBall();
-			} else if (pongBall.x > width) {
+			} else if (pongBall.x > width + 10) {
 				// Gol de Zyro - punto para Zyro
 				pongScoreZyro++;
 				resetPongBall();
@@ -3037,28 +3160,29 @@ function runPongGame() {
 		}
 	}
 	
-	// Mostrar marcador
+	// HUD - Barra de vidas (esquina superior izquierda)
 	push();
-	fill(255);
-	uiText(32);
-	textAlign(CENTER);
-	text(pongScoreZyro + ' - ' + pongScoreEnemy, width/2, 40);
-	pop();
-	
-	// Mostrar vidas
-	push();
-	fill(127, 255, 0);
-	uiText(20);
+	fill(200);
+	rect(120, 30, 220, 20, 6);
+	fill('#7FFF00'); // Verde chartreuse
+	let vidasMax = 5;
+	let vidasWidth = map(pongLives, 0, vidasMax, 0, 220);
+	rect(120 - 110 + vidasWidth/2, 30, vidasWidth, 20, 6);
+	fill('white');
+	uiText(14);
 	textAlign(LEFT);
-	text('Vidas: ' + pongLives, 20, 40);
-	pop();
+	text('Vidas: ' + pongLives, 20, 26);
 	
-	// Mostrar preguntas respondidas en esta ronda
-	push();
-	fill(255, 255, 0);
-	uiText(16);
+	// Barra de progreso (esquina superior derecha)
+	fill(200);
+	rect(width - 140, 30, 220, 20, 6);
+	fill('#FFFF00'); // Amarillo
+	let progresoWidth = map(pongQuestionsAnswered, 0, pongQuestionsPerRound, 0, 220);
+	rect(width - 140 - 110 + progresoWidth/2, 30, progresoWidth, 20, 6);
+	fill('white');
+	uiText(14);
 	textAlign(RIGHT);
-	text('Preguntas: ' + pongQuestionsAnswered + '/' + pongQuestionsPerRound, width - 20, 40);
+	text('Preguntas: ' + pongQuestionsAnswered + '/' + pongQuestionsPerRound, width - 20, 26);
 	pop();
 	
 	// Verificar victoria o derrota
@@ -3173,6 +3297,11 @@ function displayNivel3WinScreen() {
 		background(0, 150, 0);
 	}
 	
+	// Play tada sound once
+	if (tadaSound && !tadaSound.isPlaying()) {
+		tadaSound.play();
+	}
+	
 	push();
 	fill(255);
 	uiText(48);
@@ -3211,6 +3340,11 @@ function displayNivel3WinScreen() {
 
 function displayNivel3LoseScreen() {
 	background(150, 0, 0);
+	
+	// Play vineboom sound once
+	if (vineboomSound && !vineboomSound.isPlaying()) {
+		vineboomSound.play();
+	}
 	
 	push();
 	fill(255);
