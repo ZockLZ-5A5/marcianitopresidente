@@ -143,6 +143,7 @@ let helicopteroSoundPlayed = false;
 // Preload assets
 function preload() {
 	font = loadFont("assets/Arimo-Italic-VariableFont_wght.ttf");
+	fontBubble = loadFont("assets/BubblegumSans-Regular.ttf");
 	tierraInicio = loadImage("assets/tierra zyro ya x fa vor.png");
 	lunaInicio = loadImage("assets/luna zyro 1.png");
 	crasheo = loadSound("assets/car-crash-sound-effect-376874.wav");
@@ -336,20 +337,24 @@ function displayDialogue() {
 	uiText(16);
 	textAlign(LEFT, TOP);
 	let speakerName = d.speaker === 'zyro' ? 'Zyro' : (d.speaker === 'otro' ? (otroAlienRevealed ? 'Blinky' : '???') : d.speaker);
+	textFont(fontBubble);
+	uiText(24);
 	text(speakerName + ':', width/2 - width*0.9/2 + 30, boxY - 70);
 
 	// text
+	textFont(font);
 	fill('white');
-	uiText(18);
+	uiText(22);
 	textAlign(LEFT, TOP);
 	let pad = 30;
-	text(d.text, width/2 - width*0.9/2 + pad, boxY - 70 + 25, width*0.9 - pad*2, 120);
+	text(d.text, width/2 - width*0.9/2 + pad, boxY - 50 + 25, width*0.9 - pad*2, 120);
 
 	// hint
-	uiText(14);
+	textFont(fontBubble);
+	uiText(20);
 	textAlign(RIGHT);
 	fill('white');
-	text('Presiona ENTER para continuar', width/2 + width*0.9/2 - 20, boxY + 50);
+	text('Presiona ENTER para continuar', width/2 + width*0.9/2 - 20, boxY + 60);
 	pop();
 }
 
@@ -479,7 +484,11 @@ function displayLevelBoxes() {
 		}
 
 		// label text: EXTREMELY small - using textSize directly (drawn on top of trophy)
-		fill('#fff');
+let textColor = '#fff';
+if (isCompleted) {
+textColor = '#8B0000'; // Guinda for completed
+}
+fill(textColor);
 		textAlign(CENTER, TOP);
 		
 		// Split text manually and use TINY fixed sizes with more spacing
@@ -513,7 +522,8 @@ function displayLevelBoxes() {
 		if (showHint) {
 			push();
 			fill('white');
-			uiText(14);
+			textFont(fontBubble);
+			uiText(18);
 			textAlign(CENTER);
 			
 			if (isCompleted) {
@@ -616,7 +626,7 @@ function uiText(base) {
 
 function setup(){ // corre 1 vez, CARGAR SPRITES AQUÍ!!!
 	createCanvas();
-	textFont(font);
+	textFont(fontBubble);
 	textAlign(CENTER);
 	rectMode(CENTER);
 	world.gravity.y = 9.81;
@@ -1053,7 +1063,7 @@ function nivelUnoLoop(){
 		if (nivelUnoDialogActive) {
 			drawLevelDialog(nivelUnoDialog[nivelUnoDialogIndex]);
 			// Show prompt to continue
-			push(); uiText(14); fill('white'); textAlign(CENTER); text('Presiona ENTER para continuar', width/2, height - 40); pop();
+			push(); textFont(fontBubble); uiText(20); fill('white'); textAlign(CENTER); text('Presiona ENTER para continuar', width/2, 175); pop();
 			
 			// Use edge detection: only advance on NEW press, not while held
 			let enterDown = keyIsDown(ENTER);
@@ -1150,7 +1160,7 @@ function nivelUnoLoop(){
 		if (nivelUnoDialogActive) {
 			drawLevelDialog(nivelUnoDialog[nivelUnoDialogIndex]);
 			// Show prompt to continue
-			push(); uiText(14); fill('white'); textAlign(CENTER); text('Presiona ENTER para continuar', width/2, height - 40); pop();
+			push(); textFont(fontBubble); uiText(20); fill('white'); textAlign(CENTER); text('Presiona ENTER para continuar', width/2, 175); pop();
 			
 			// Use edge detection: only advance on NEW press
 			let enterDown = keyIsDown(ENTER);
@@ -1182,8 +1192,8 @@ function nivelUnoLoop(){
 		// Primer diálogo: pensamiento inicial de Zyro
 		if (nivelUnoDialogActive && nivelUnoDialogIndex === 0 && nivelUnoDialog.length === 1) {
 			drawLevelDialog(nivelUnoDialog[nivelUnoDialogIndex]);
-			push(); uiText(14); fill('white'); textAlign(CENTER); 
-			text('Presiona ENTER para continuar', width/2, height - 40); pop();
+			push(); textFont(fontBubble); uiText(20); fill('white'); textAlign(CENTER); 
+			text('Presiona ENTER para continuar', width/2, 175); pop();
 			
 			let enterDown = keyIsDown(ENTER);
 			let enterPressed = enterDown && !prevEnterDown;
@@ -1225,8 +1235,8 @@ function nivelUnoLoop(){
 		// Mostrar diálogo del senador (ya con control activado)
 		if (nivelUnoDialogActive && nivelUnoDialog.length > 1) {
 			drawLevelDialog(nivelUnoDialog[nivelUnoDialogIndex]);
-			push(); uiText(14); fill('white'); textAlign(CENTER); 
-			text('Presiona ENTER para continuar', width/2, height - 40); pop();
+			push(); textFont(fontBubble); uiText(20); fill('white'); textAlign(CENTER); 
+			text('Presiona ENTER para continuar', width/2, 175); pop();
 			
 			let enterDown = keyIsDown(ENTER);
 			let enterPressed = enterDown && !prevEnterDown;
@@ -1280,14 +1290,16 @@ function drawLevelDialog(entry) {
 
 	// Speaker name + text
 	noStroke();
-	uiText(16);
+	textFont(fontBubble);
+	uiText(24);
 	textAlign(LEFT, TOP);
 	fill(c);
 	let whoLabel = speaker === 'zyro' ? 'Zyro' : (speaker === 'otro' ? (otroAlienRevealed ? 'Blinky' : '???') : (speaker === 'guia' ? 'Guía' : (speaker === 'senator' ? 'Senador' : (speaker === 'juez' ? 'Juez' : (speaker === 'agente' ? 'Agente' : (speaker === 'voice' ? '???' : (speaker === 'alipresi' ? 'Presidente Mack' : speaker)))))));
-	text(whoLabel + ':', width/2 - width*0.9/2 + 20, 60);
+	text(whoLabel + ':', width/2 - width*0.9/2 + 20, 55);
 
 	fill(255);
-	uiText(18);
+	textFont(font);
+	uiText(22);
 	text(entry.text, width/2 - width*0.9/2 + 20, 90, width*0.9 - 40, 120);
 	pop();
 }
@@ -1489,14 +1501,14 @@ function runMinigame(){
 	fill('#F44336');
 	let hw = map(levelOneHealth, 0, 5, 0, 220);
 	rect(120 - 110 + hw/2, 30, hw, 20, 6);
-	fill('white'); uiText(14); textAlign(LEFT); text('Vida: ' + levelOneHealth, 20, 26);
+	fill('white'); textFont(fontBubble); uiText(18); textAlign(LEFT); text('Vida: ' + levelOneHealth, 20, 26);
 	
 	fill(200);
 	rect(width - 140, 30, 220, 20, 6);
-	fill('#4CAF50');
+	fill('#4CAF50'); // Verde para preguntas
 	let pw = map(levelOneProgress, 0, 10, 0, 220);
 	rect(width - 140 - 110 + pw/2, 30, pw, 20, 6);
-	fill('white'); uiText(14); textAlign(RIGHT); text('Progreso: ' + levelOneProgress + '/10', width - 20, 26);
+	fill('white'); textFont(fontBubble); uiText(18); textAlign(RIGHT); text('Preguntas: ' + levelOneProgress + '/10', width - 20, 26);
 	pop();
 
 	if (awaitingQuestion && currentQuestion) {
@@ -1530,7 +1542,7 @@ function drawQuestionOverlay(q) {
 	for (let i=0;i<q.opts.length;i++){
 		text((i+1) + ") " + q.opts[i], width/2 - width*0.8/2 + 40, height/2 - height*0.6/2 + 120 + i*36);
 	}
-	uiText(14); textAlign(RIGHT); text('Presiona 1-4 para responder', width/2 + width*0.8/2 - 20, height/2 + height*0.6/2 - 20);
+	textFont(fontBubble); uiText(20); textAlign(RIGHT); fill('white'); text('Presiona 1-4 para responder', width/2 + width*0.8/2 - 20, height/2 + height*0.6/2 - 20);
 	pop();
 }
 
@@ -1666,8 +1678,8 @@ function nivelDosLoop() {
 		
 		if (nivelDosDialogActive) {
 			drawLevelDialog(nivelDosDialog[nivelDosDialogIndex]);
-			push(); uiText(14); fill('white'); textAlign(CENTER); 
-			text('Presiona ENTER para continuar', width/2, height - 40); pop();
+			push(); textFont(fontBubble); uiText(20); fill('white'); textAlign(CENTER); 
+			text('Presiona ENTER para continuar', width/2, 175); pop();
 			
 			let enterDown = keyIsDown(ENTER);
 			let enterPressed = enterDown && !prevEnterDown;
@@ -1703,7 +1715,7 @@ function nivelDosLoop() {
 		
 		// Permitir entrar al edificio después del tour
 		if (zyro.pos.x > width/2 - 200 && zyro.pos.x < width/2 - 100) {
-			push(); uiText(20); fill('white'); textAlign(CENTER);
+			push(); textFont(fontBubble); uiText(22); fill('white'); textAlign(CENTER);
 			if (nivelDosTourFinished) text('Entrar? Presiona ENTER', width/2 - 150, 80);
 			else text('Habla con el guía primero', width/2, 80);
 			pop();
@@ -1728,8 +1740,8 @@ function nivelDosLoop() {
 		
 		if (nivelDosDialogActive) {
 			drawLevelDialog(nivelDosDialog[nivelDosDialogIndex]);
-			push(); uiText(14); fill('white'); textAlign(CENTER); 
-			text('Presiona ENTER para continuar', width/2, height - 40); pop();
+			push(); textFont(fontBubble); uiText(20); fill('white'); textAlign(CENTER); 
+			text('Presiona ENTER para continuar', width/2, 175); pop();
 			
 			let enterDown = keyIsDown(ENTER);
 			let enterPressed = enterDown && !prevEnterDown;
@@ -1759,8 +1771,8 @@ function nivelDosLoop() {
 		if (nivelDosDialogActive && !mazoGolpeado) {
 			if (zyro) zyro.draw();
 			drawLevelDialog(nivelDosDialog[nivelDosDialogIndex]);
-			push(); uiText(14); fill('white'); textAlign(CENTER); 
-			text('Presiona ENTER para continuar', width/2, height - 40); pop();
+			push(); textFont(fontBubble); uiText(20); fill('white'); textAlign(CENTER); 
+			text('Presiona ENTER para continuar', width/2, 175); pop();
 			
 			let enterDown = keyIsDown(ENTER);
 			let enterPressed = enterDown && !prevEnterDown;
@@ -1837,8 +1849,8 @@ function nivelDosLoop() {
 		// Diálogo con los jueces
 		if (nivelDosDialogActive && mazoGolpeado) {
 			drawLevelDialog(nivelDosDialog[nivelDosDialogIndex]);
-			push(); uiText(14); fill('white'); textAlign(CENTER); 
-			text('Presiona ENTER para continuar', width/2, height - 40); pop();
+			push(); textFont(fontBubble); uiText(20); fill('white'); textAlign(CENTER); 
+			text('Presiona ENTER para continuar', width/2, 175); pop();
 			
 			let enterDown = keyIsDown(ENTER);
 			let enterPressed = enterDown && !prevEnterDown;
@@ -2122,7 +2134,7 @@ function runBreakoutGame() {
 	fill('#F44336');
 	let hw = map(levelTwoHealth, 0, 5, 0, 220);
 	rect(120 - 110 + hw/2, 30, hw, 20, 6);
-	fill('white'); uiText(14); textAlign(LEFT); 
+	fill('white'); textFont(fontBubble); uiText(18); textAlign(LEFT); 
 	text('Vidas: ' + levelTwoHealth, 20, 26);
 	
 	fill(200);
@@ -2130,7 +2142,7 @@ function runBreakoutGame() {
 	fill('#4CAF50');
 	let pw = map(breakoutQuestionsAnswered, 0, 10, 0, 220);
 	rect(width - 140 - 110 + pw/2, 30, pw, 20, 6);
-	fill('white'); uiText(14); textAlign(RIGHT); 
+	fill('white'); textFont(fontBubble); uiText(18); textAlign(RIGHT); 
 	text('Preguntas: ' + breakoutQuestionsAnswered + '/10', width - 20, 26);
 	pop();
 	
@@ -2247,9 +2259,9 @@ function startSalaJueces() {
 		{ who: 'zyro', text: 'Ooooohhh... muy elegante, veo que hay ministros aquí, pero mira ese mazo...' }
 	];
 	
-	// Crear sprite del mazo (87px más abajo y 110px a la izquierda del centro)
+	// Crear sprite del mazo (107px más abajo y 110px a la izquierda del centro)
 	if (gavelSprite) gavelSprite.remove();
-	gavelSprite = new Sprite(width/2 - 110, height/2 + 87, 200, 200, 's');
+	gavelSprite = new Sprite(width/2 - 110, height/2 + 107, 200, 200, 's');
 	gavelSprite.rotationLock = true;
 	gavelSprite.color = color(139, 69, 19); // Color café/marrón por defecto
 	// Si hay imagen de mazo, usarla con escala apropiada
@@ -2374,7 +2386,7 @@ function drawVictoryDos() {
 	}
 	
 	uiText(24);
-	fill('#FFAA00');
+	fill('#CC8800');
 	text('🚁 Un helicóptero te llevará de regreso 🚁', width/2, height/2 + 120);
 	fill('white');
 	uiText(20);
@@ -2406,6 +2418,7 @@ function startNivelTres() {
 	otroAlien.pos = { x: width/2 + 50, y: height - 70 };
 	otroAlien.scale = 0.7;
 	otroAlien.visible = true;
+	otroAlienRevealed = true; // Reveal Blinky's name from the start
 	
 	// Diálogo inicial entre Zyro y otroAlien
 	nivelTresDialog = [
@@ -2436,10 +2449,10 @@ function nivelTresLoop() {
 		if (nivelTresDialogActive) {
 			drawLevelDialog(nivelTresDialog[nivelTresDialogIndex]);
 			push(); 
-			uiText(14); 
+			textFont(fontBubble); uiText(20); 
 			fill('white'); 
 			textAlign(CENTER); 
-			text('Presiona ENTER para continuar', width/2, height - 40); 
+			text('Presiona ENTER para continuar', width/2, 175); 
 			pop();
 			
 			let enterDown = keyIsDown(ENTER);
@@ -2542,10 +2555,10 @@ function runInteriorPalacio() {
 		background(35, 110, 200);
 	}
 	
-	// Dibujar sprites
+	// Dibujar sprites (asegurar Blinky visible)
+	if (otroAlien) { otroAlien.visible = true; otroAlien.scale = 0.7; otroAlien.draw(); }
 	if (nivelUnoGuide) nivelUnoGuide.draw();
 	if (nivelDosGuide) nivelDosGuide.draw();
-	if (otroAlien) otroAlien.draw();
 	if (zyro) zyro.draw();
 	
 	// Permitir movimiento de Zyro si no hay diálogo activo
@@ -2557,10 +2570,10 @@ function runInteriorPalacio() {
 	if (nivelTresDialogActive && !agenteSecreto) {
 		drawLevelDialog(nivelTresDialog[nivelTresDialogIndex]);
 		push(); 
-		uiText(14); 
+		textFont(fontBubble); uiText(20); 
 		fill('white'); 
 		textAlign(CENTER); 
-		text('Presiona ENTER para continuar', width/2, height - 40); 
+		text('Presiona ENTER para continuar', width/2, 175); 
 		pop();
 		
 		let enterDown = keyIsDown(ENTER);
@@ -2580,7 +2593,7 @@ function runInteriorPalacio() {
 				agenteSecreto.h = 150;
 				if (guardHomImg) {
 					agenteSecreto.image = guardHomImg;
-					agenteSecreto.scale = 2.0; // 2x del tamaño original (1.0 * 2)
+						agenteSecreto.scale = 0.22; // Tamaño similar a los guías
 				} else {
 					agenteSecreto.color = color(0, 0, 0);
 				}
@@ -2610,10 +2623,10 @@ function runInteriorPalacio() {
 			// Mostrar diálogo del agente
 			drawLevelDialog(nivelTresDialog[nivelTresDialogIndex]);
 			push(); 
-			uiText(14); 
+			textFont(fontBubble); uiText(20); 
 			fill('white'); 
 			textAlign(CENTER); 
-			text('Presiona ENTER para continuar', width/2, height - 40); 
+			text('Presiona ENTER para continuar', width/2, 175); 
 			pop();
 			
 			let enterDown = keyIsDown(ENTER);
@@ -2698,10 +2711,10 @@ function runOficinaPresidencial() {
 		drawLevelDialog(currentDialog);
 		
 		push(); 
-		uiText(14); 
+		textFont(fontBubble); uiText(20); 
 		fill('white'); 
 		textAlign(CENTER); 
-		text('Presiona ENTER para continuar', width/2, height - 40); 
+		text('Presiona ENTER para continuar', width/2, 175); 
 		pop();
 		
 		let enterDown = keyIsDown(ENTER);
@@ -2752,40 +2765,40 @@ function runOficinaPresidencial() {
 }
 
 function crearAlipresi() {
-	// Crear sprite del presidente alienígena más arriba y en el centro
+	// Crear sprite del presidente alienígena centrado entre guardias
 	if (alipresi) alipresi.remove();
-	alipresi = new Sprite(width - 200, height - 120, 's'); // Más arriba y centrado entre guardias
+	alipresi = new Sprite(width/2, height - 125, 's'); // Centrado
 	alipresi.w = 100;
 	alipresi.h = 150;
 	if (alienMaloImg) {
 		alipresi.image = alienMaloImg;
-		alipresi.scale = 1.2; // 2x del tamaño original (0.6 * 2)
+		alipresi.scale = 1.2; // Presidente ligeramente más grande
 	} else {
 		alipresi.color = color(255, 0, 0); // Fallback rojo
 	}
 	alipresi.rotationLock = true;
 	
-	// Crear guardia femenina a la derecha del presidente
+	// Crear guardia femenina (izquierda del presidente)
 	if (agenteFem) agenteFem.remove();
-	agenteFem = new Sprite(width - 80, height - 120, 's'); // Más a la derecha y arriba
+	agenteFem = new Sprite(width/2 - 160, height - 120, 's');
 	agenteFem.w = 100;
 	agenteFem.h = 150;
 	if (guardFemImg) {
 		agenteFem.image = guardFemImg;
-		agenteFem.scale = 1.2; // 2x del tamaño original (0.6 * 2)
+		agenteFem.scale = 1.0; // Similar a guías
 	} else {
 		agenteFem.color = color(0, 0, 0);
 	}
 	agenteFem.rotationLock = true;
 	
-	// Crear guardia masculina pegado a la derecha
+	// Crear guardia masculina (derecha del presidente)
 	if (guardHomSprite) guardHomSprite.remove();
-	guardHomSprite = new Sprite(width - 40, height - 140, 's'); // Más pegado a la derecha y más arriba
+	guardHomSprite = new Sprite(width/2 + 160, height - 120, 's');
 	guardHomSprite.w = 100;
 	guardHomSprite.h = 150;
 	if (guardHomImg) {
 		guardHomSprite.image = guardHomImg;
-		guardHomSprite.scale = 2.0; // 2x del tamaño original (1.0 * 2)
+		guardHomSprite.scale = 1.0; // Similar a guías
 	} else {
 		guardHomSprite.color = color(0, 0, 0);
 	}
@@ -2805,10 +2818,10 @@ function runPongInterRoundDialog() {
 		drawLevelDialog(pongInterRoundMessages[pongInterRoundIndex]);
 		
 		push(); 
-		uiText(14); 
+		textFont(fontBubble); uiText(20); 
 		fill('white'); 
 		textAlign(CENTER); 
-		text('Presiona ENTER para continuar', width/2, height - 40); 
+		text('Presiona ENTER para continuar', width/2, 175); 
 		pop();
 		
 		let enterDown = keyIsDown(ENTER);
@@ -2857,13 +2870,24 @@ function startPongGame() {
 	// Limpiar sprites de la oficina
 	if (agenteSecreto) {
 		agenteSecreto.pos = { x: -5000, y: -5000 };
+		agenteSecreto.collider = 'none';
+		agenteSecreto.visible = false;
 	}
 	if (agenteFem) {
 		agenteFem.pos = { x: -5000, y: -5000 };
+		agenteFem.collider = 'none';
+		agenteFem.visible = false;
 	}
 	if (alipresi) {
 		alipresi.pos = { x: -5000, y: -5000 };
+		alipresi.collider = 'none';
+		alipresi.visible = false;
 	}
+	// Quitar colisión y visibilidad de guías y Blinky para que no interfieran
+	if (nivelUnoGuide) { nivelUnoGuide.collider = 'none'; nivelUnoGuide.pos = { x: -5000, y: -5000 }; nivelUnoGuide.visible = false; }
+	if (nivelDosGuide) { nivelDosGuide.collider = 'none'; nivelDosGuide.pos = { x: -5000, y: -5000 }; nivelDosGuide.visible = false; }
+	if (otroAlien) { otroAlien.collider = 'none'; otroAlien.pos = { x: -5000, y: -5000 }; otroAlien.visible = false; }
+	if (zyro) { zyro.collider = 'none'; zyro.pos = { x: -5000, y: -5000 }; zyro.visible = false; }
 	
 	// Crear sprites de guardias en el fondo (fase 3)
 	// Estos se mostrarán u ocultarán según la ronda
@@ -2897,8 +2921,8 @@ function startPongGame() {
 	
 	// Crear pelota de pong (roja, más rápida)
 	if (pongBall) pongBall.remove();
-	pongBall = new Sprite(width/2, height/2, 15, 'd');
-	pongBall.diameter = 15;
+	pongBall = new Sprite(width/2, height/2, 30, 'd');
+	pongBall.diameter = 30;
 	pongBall.color = color(255, 0, 0); // Roja
 	pongBall.bounciness = 1; // Rebote elástico para mantener velocidad
 	pongBall.friction = 0;
@@ -3146,16 +3170,19 @@ function runPongGame() {
 				}
 			}
 			
-			// Detectar goles con margen de seguridad
-			if (pongBall.x < -10) {
-				// Gol del enemigo - punto para enemigo
-				pongScoreEnemy++;
-				pongLives--; // Siempre pierde vida cuando le anotan
-				resetPongBall();
-			} else if (pongBall.x > width + 10) {
-				// Gol de Zyro - punto para Zyro
-				pongScoreZyro++;
-				resetPongBall();
+			// Detectar goles usando posición relativa a las paletas (umbral después de cada paleta)
+			if (!pongQuestionActive && pongBall) {
+				let leftThreshold = pongPaddleZyro ? (pongPaddleZyro.x - pongPaddleZyro.width/2 - pongBall.width/2 - 4) : pongBall.width/2;
+				let rightThreshold = pongPaddleEnemy ? (pongPaddleEnemy.x + pongPaddleEnemy.width/2 + pongBall.width/2 + 4) : (width - pongBall.width/2);
+				if (pongBall.x <= leftThreshold) {
+					// Bola pasó la paleta izquierda: Zyro pierde una vida
+					pongLives = max(0, pongLives - 1);
+					resetPongBall();
+				} else if (pongBall.x >= rightThreshold) {
+					// Bola pasó la paleta derecha: Zyro gana un punto
+					pongScoreZyro++;
+					resetPongBall();
+				}
 			}
 		}
 	}
@@ -3164,23 +3191,25 @@ function runPongGame() {
 	push();
 	fill(200);
 	rect(120, 30, 220, 20, 6);
-	fill('#7FFF00'); // Verde chartreuse
+	fill('#FF0000'); // Roja para vidas
 	let vidasMax = 5;
 	let vidasWidth = map(pongLives, 0, vidasMax, 0, 220);
 	rect(120 - 110 + vidasWidth/2, 30, vidasWidth, 20, 6);
 	fill('white');
-	uiText(14);
+	textFont(fontBubble);
+	uiText(18);
 	textAlign(LEFT);
 	text('Vidas: ' + pongLives, 20, 26);
 	
 	// Barra de progreso (esquina superior derecha)
 	fill(200);
 	rect(width - 140, 30, 220, 20, 6);
-	fill('#FFFF00'); // Amarillo
+	fill('#4CAF50'); // Verde para preguntas
 	let progresoWidth = map(pongQuestionsAnswered, 0, pongQuestionsPerRound, 0, 220);
 	rect(width - 140 - 110 + progresoWidth/2, 30, progresoWidth, 20, 6);
 	fill('white');
-	uiText(14);
+	textFont(fontBubble);
+	uiText(18);
 	textAlign(RIGHT);
 	text('Preguntas: ' + pongQuestionsAnswered + '/' + pongQuestionsPerRound, width - 20, 26);
 	pop();
@@ -3241,7 +3270,7 @@ function resetPongBall() {
 }
 
 function handleCorrectPongAnswer() {
-	// Punto para Zyro
+	// Respuesta correcta - Zyro gana un punto
 	pongScoreZyro++;
 	pongQuestionsAnswered++;
 	pongQuestionActive = false;
@@ -3258,8 +3287,7 @@ function handleCorrectPongAnswer() {
 }
 
 function handleWrongPongAnswer() {
-	// Punto para enemigo y pierde vida
-	pongScoreEnemy++;
+	// Respuesta incorrecta - Zyro pierde una vida
 	pongLives--;
 	pongQuestionsAnswered++;
 	pongQuestionActive = false;
