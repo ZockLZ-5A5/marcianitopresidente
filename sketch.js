@@ -111,7 +111,7 @@ let guardHomSprite = null; // sprite del guardia masculino (en pong)
 let viejoSprite = null; // el viejo acompaña en nivel 3
 let pongBall, pongPaddleZyro, pongPaddleEnemy;
 let pongTennisBall = null; // Pelota de tenis (círculo amarillo con ?)
-let pongBallSpeed = 8; // Velocidad base de la pelota (más rápida)
+let pongBallSpeed = 10; // Velocidad base de la pelota (más rápida)
 let pongScoreZyro = 0, pongScoreEnemy = 0;
 let pongQuestionsPerRound = 5; // 5 preguntas por contrincante
 let pongQuestionsAnswered = 0; // Preguntas respondidas en la ronda actual
@@ -710,49 +710,68 @@ function draw(){
 function update(){ // corre en loop, AQUÍ VA LA LÓGICA DEL JUEGO
 	// Credits screen
 	if (showCredits) {
-		background(0);
+		// Fondo con gradiente
+		for (let i = 0; i < height; i++) {
+			let inter = map(i, 0, height, 0, 1);
+			let c = lerpColor(color(20, 40, 80), color(10, 20, 40), inter);
+			stroke(c);
+			line(0, i, width, i);
+		}
 		
-		// Texto a la izquierda (20px del borde)
+		// Título centrado arriba
 		push();
-		fill(255);
-		uiText(48);
-		textAlign(LEFT, TOP);
-		text('Gracias por jugar', 20, 40);
+		fill(255, 220, 100);
+		uiText(56);
+		textAlign(CENTER, TOP);
+		text('¡Felicidades!', width/2, 30);
 		
-		uiText(20);
-		fill(200);
-		text('Has completado tu aventura', 20, 120);
-		text('aprendiendo sobre el gobierno', 20, 150);
-		text('de México.', 20, 180);
+		uiText(28);
+		fill(255, 255, 255);
+		text('Has completado tu aventura educativa', width/2, 100);
+		
+		uiText(22);
+		fill(200, 200, 255);
+		text('Ahora conoces los 3 poderes del gobierno de México', width/2, 145);
 		pop();
 		
-		// Trofeos abajo del texto a la izquierda
-		let trophyY = height - 200;
-		let trophySize = 80;
-		let trophySpacing = 100;
+		// Trofeos centrados en la parte media
+		let trophyY = height/2 - 50;
+		let trophySize = 100;
+		let trophySpacing = 140;
+		let startX = width/2 - trophySpacing;
 		
 		if (trofeoPin) {
-			image(trofeoPin, 40, trophyY, trophySize, trophySize);
+			image(trofeoPin, startX - trophySize/2, trophyY, trophySize, trophySize);
+			push();
+			fill(255, 220, 150);
+			uiText(16);
+			textAlign(CENTER);
+			text('Poder\nLegislativo', startX, trophyY + trophySize + 20);
+			pop();
 		}
 		if (trofeoMazo) {
-			image(trofeoMazo, 40 + trophySpacing, trophyY, trophySize, trophySize);
+			image(trofeoMazo, startX + trophySpacing - trophySize/2, trophyY, trophySize, trophySize);
+			push();
+			fill(255, 220, 150);
+			uiText(16);
+			textAlign(CENTER);
+			text('Poder\nJudicial', startX + trophySpacing, trophyY + trophySize + 20);
+			pop();
 		}
 		if (trofeoBanda) {
-			image(trofeoBanda, 40 + trophySpacing * 2, trophyY, trophySize, trophySize);
+			image(trofeoBanda, startX + trophySpacing * 2 - trophySize/2, trophyY, trophySize, trophySize);
+			push();
+			fill(255, 220, 150);
+			uiText(16);
+			textAlign(CENTER);
+			text('Poder\nEjecutivo', startX + trophySpacing * 2, trophyY + trophySize + 20);
+			pop();
 		}
 		
-		// Imagen de Zyro gigante a la derecha
+		// Imagen de Zyro en la esquina inferior derecha
 		if (zyroIdle) {
-			let zyroSize = height * 0.5; // Cabeza llena media hoja
-			let zyroX = width - zyroSize/2 - 50;
-			let zyroY = height/4;
-			image(zyroIdle, zyroX - zyroSize/2, zyroY - zyroSize/2, zyroSize, zyroSize);
-			
-			// Tierra debajo de Zyro, centrada con él
-			if (tierraInicio) {
-				let tierraSize = zyroSize * 0.6;
-				image(tierraInicio, zyroX - tierraSize/2, zyroY + zyroSize/2 - 40, tierraSize, tierraSize);
-			}
+			let zyroSize = 180;
+			image(zyroIdle, width - zyroSize - 20, height - zyroSize - 100, zyroSize, zyroSize);
 		}
 		
 		// Botón "Volver al inicio" abajo
@@ -876,8 +895,8 @@ function update(){ // corre en loop, AQUÍ VA LA LÓGICA DEL JUEGO
 		if (zyro) zyro.draw();
 		if (otroAlien) otroAlien.draw();
 		
-		// Don't allow Zyro movement while dialogue is active
-		if (!dialogueActive) {
+		// Don't allow Zyro movement while dialogue is active or during final dialog
+		if (!dialogueActive && !showFinalDialog) {
 			controlesZyroBase();
 		}
 		
@@ -2502,9 +2521,9 @@ function startInteriorPalacio() {
 	// Reposicionar sprites al borde inferior de la pantalla
 	// otroAlien donde estaba Zyro
 	otroAlien.pos = { x: width/2 - 90, y: height - 80 };
-	otroAlien.image = "assets/otroAlien.png";
+	otroAlien.image = "assets/otroAlienvolteado.png"; // Usar imagen mirando a la izquierda
 	otroAlien.scale = 0.7;
-	otroAlien.mirror.x = true; // Voltear horizontalmente para que mire a la izquierda
+	otroAlien.mirror.x = false; // Asegurar que no esté volteado
 	otroAlien.visible = true;
 	
 	// Zyro 100px a la derecha de otroAlien
@@ -2593,7 +2612,7 @@ function runInteriorPalacio() {
 				agenteSecreto.h = 150;
 				if (guardHomImg) {
 					agenteSecreto.image = guardHomImg;
-						agenteSecreto.scale = 0.22; // Tamaño similar a los guías
+						agenteSecreto.scale = 0.7; // Mismo tamaño que Zyro
 				} else {
 					agenteSecreto.color = color(0, 0, 0);
 				}
@@ -2765,9 +2784,9 @@ function runOficinaPresidencial() {
 }
 
 function crearAlipresi() {
-	// Crear sprite del presidente alienígena centrado entre guardias
+	// Crear sprite del presidente alienígena
 	if (alipresi) alipresi.remove();
-	alipresi = new Sprite(width/2, height - 125, 's'); // Centrado
+	alipresi = new Sprite(width - 200, height - 125, 's'); // width - 200
 	alipresi.w = 100;
 	alipresi.h = 150;
 	if (alienMaloImg) {
@@ -2778,27 +2797,27 @@ function crearAlipresi() {
 	}
 	alipresi.rotationLock = true;
 	
-	// Crear guardia femenina (izquierda del presidente)
+	// Crear guardia femenina a la derecha
 	if (agenteFem) agenteFem.remove();
-	agenteFem = new Sprite(width/2 - 160, height - 120, 's');
+	agenteFem = new Sprite(width - 100, height - 70, 's'); // width - 100
 	agenteFem.w = 100;
 	agenteFem.h = 150;
 	if (guardFemImg) {
 		agenteFem.image = guardFemImg;
-		agenteFem.scale = 1.0; // Similar a guías
+		agenteFem.scale = 0.7; // Mismo tamaño que Zyro
 	} else {
 		agenteFem.color = color(0, 0, 0);
 	}
 	agenteFem.rotationLock = true;
 	
-	// Crear guardia masculina (derecha del presidente)
+	// Crear guardia masculina más a la izquierda
 	if (guardHomSprite) guardHomSprite.remove();
-	guardHomSprite = new Sprite(width/2 + 160, height - 120, 's');
+	guardHomSprite = new Sprite(width - 300, height - 70, 's'); // width - 300
 	guardHomSprite.w = 100;
 	guardHomSprite.h = 150;
 	if (guardHomImg) {
 		guardHomSprite.image = guardHomImg;
-		guardHomSprite.scale = 1.0; // Similar a guías
+		guardHomSprite.scale = 0.7; // Mismo tamaño que Zyro
 	} else {
 		guardHomSprite.color = color(0, 0, 0);
 	}
@@ -2883,10 +2902,11 @@ function startPongGame() {
 		alipresi.collider = 'none';
 		alipresi.visible = false;
 	}
-	// Quitar colisión y visibilidad de guías y Blinky para que no interfieran
+	// Quitar colisión de guías y Blinky para que no interfieran (pero mantenerlos ocultos)
 	if (nivelUnoGuide) { nivelUnoGuide.collider = 'none'; nivelUnoGuide.pos = { x: -5000, y: -5000 }; nivelUnoGuide.visible = false; }
 	if (nivelDosGuide) { nivelDosGuide.collider = 'none'; nivelDosGuide.pos = { x: -5000, y: -5000 }; nivelDosGuide.visible = false; }
 	if (otroAlien) { otroAlien.collider = 'none'; otroAlien.pos = { x: -5000, y: -5000 }; otroAlien.visible = false; }
+	// No ocultar a Zyro durante el pong
 	if (zyro) { zyro.collider = 'none'; zyro.pos = { x: -5000, y: -5000 }; zyro.visible = false; }
 	
 	// Crear sprites de guardias en el fondo (fase 3)
@@ -3325,9 +3345,12 @@ function displayNivel3WinScreen() {
 		background(0, 150, 0);
 	}
 	
-	// Play tada sound once
-	if (tadaSound && !tadaSound.isPlaying()) {
-		tadaSound.play();
+	// Play tada sound once using static variable
+	if (!displayNivel3WinScreen.soundPlayed) {
+		if (tadaSound) {
+			tadaSound.play();
+			displayNivel3WinScreen.soundPlayed = true;
+		}
 	}
 	
 	push();
@@ -3398,6 +3421,11 @@ function displayNivel3LoseScreen() {
 }
 
 function cleanupPong() {
+	// Reset sound flag
+	if (displayNivel3WinScreen.soundPlayed) {
+		displayNivel3WinScreen.soundPlayed = false;
+	}
+	
 	if (pongBall && !pongBall.removed) {
 		pongBall.remove();
 		pongBall = null;
